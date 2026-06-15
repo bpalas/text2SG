@@ -1,0 +1,19 @@
+# text2graph-evolve — dependencias
+
+# --- Núcleo (requerido) ---
+google-genai        # backend Gemini (default) + tipos GenerateContentConfig
+pandas              # dataframes de artículos / gold
+pyarrow             # lectura de parquet (gold standard)
+numpy               # RNG del loop, estadística
+rapidfuzz           # match difuso de entidades en la rúbrica
+pyyaml              # configs
+python-dotenv       # carga GEMINI_API_KEY desde .env
+
+# --- Backends LLM opcionales (instalar solo el que uses) ---
+# El backend se elige en runtime; cada SDK se importa de forma perezosa.
+anthropic           # --llm anthropic (Claude: Opus/Sonnet/Haiku)
+openai              # --llm openai (GPT)
+# Ollama no requiere paquete: se habla por HTTP a http://localhost:11434
+
+# --- Desarrollo ---
+pytest              # suite de tests (python -m pytest swarm_optimizer/tests/ -q)

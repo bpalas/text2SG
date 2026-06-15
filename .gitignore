@@ -1,0 +1,57 @@
+# Editor / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Python / venv
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# API keys
+.env
+*.env
+
+# Planillas de validación (contienen texto del corpus, licencia IMFD)
+gold_standard/*.xlsx
+
+# Gold standard data (grande, licencia IMFD — versionar solo lo generado)
+gold_standard_v5/
+
+# Resultados de corridas evolutivas (datos voluminosos, no versionar)
+# Para comparar experimentos: usa scripts/report_run.py y guarda el .md manualmente
+results/swarm/history*.jsonl
+results/swarm/best_config.json
+results/swarm/policy.json
+results/swarm/splits.json
+
+# Logs temporales
+*.log
+run_output.log
+smoke*.log
+
+# Scratch / experimentos sueltos (no son superficie de producción)
+sandbox/
+_commitmsg.txt
+*.tmp
+*.bak
+
+# Caches de herramientas Python
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+*.egg-info/
+build/
+dist/
+.ipynb_checkpoints/
+
+# Resultados internos del optimizador
+swarm_optimizer/results/
+
+# Harness de agentes: prompts y respuestas crudos (voluminosos, regenerables
+# con scripts/agent_eval.py dump/collect). Se versiona solo REPORTE, candidates,
+# bconfigs, grids y los preds.jsonl/ids.json (livianos).
+results/swarm/agent_run/*/prompts/
+results/swarm/agent_run/*/responses/

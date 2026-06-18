@@ -1,8 +1,9 @@
 # text2sg — Political Relation Extraction as Signed Graphs
 
-![tests](https://img.shields.io/badge/tests-passing-brightgreen)
+![tests](https://github.com/bpalas/text2SG/actions/workflows/ci.yml/badge.svg)
 ![python](https://img.shields.io/badge/python-3.10%2B-blue)
 ![license](https://img.shields.io/badge/license-MIT-blue)
+![PyPI](https://img.shields.io/pypi/v/text2sg)
 
 Turn Spanish-language news articles into **structured signed graphs** of political relations using any LLM backend (Gemini, Claude, GPT, or local Ollama).
 
@@ -33,6 +34,7 @@ Most political NLP stops at sentiment or named entities. Signed graphs encode **
 pip install -e ".[gemini]"     # Gemini (default)
 pip install -e ".[claude]"     # Claude
 pip install -e ".[openai]"     # GPT
+pip install -e ".[ollama]"     # local (Ollama)
 pip install -e ".[all]"        # all backends + dev deps
 ```
 

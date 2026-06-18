@@ -1,0 +1,35 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "text2sg"
+version = "0.2.0"
+description = "Extract signed political graphs from Spanish-language news using LLMs"
+readme = "README.md"
+license = { file = "LICENSE" }
+requires-python = ">=3.10"
+keywords = ["nlp", "information-extraction", "signed-graphs", "political-science", "llm"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Text Processing :: Linguistic",
+]
+
+# All LLM backends are optional — install only what you use
+dependencies = []
+
+[project.optional-dependencies]
+gemini  = ["google-genai>=1.0"]
+claude  = ["anthropic>=0.40"]
+openai  = ["openai>=1.0"]
+dev     = ["pytest>=8.0", "pandas>=2.0"]
+all     = ["google-genai>=1.0", "anthropic>=0.40", "openai>=1.0", "pandas>=2.0"]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["text2sg*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

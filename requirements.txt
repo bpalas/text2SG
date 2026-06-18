@@ -1,19 +1,14 @@
-# text2graph-evolve — dependencias
+# Install only the backend(s) you use — all are optional
+# pip install text2sg[gemini]   → Gemini (default)
+# pip install text2sg[claude]   → Claude
+# pip install text2sg[openai]   → OpenAI / GPT
+# pip install text2sg[all]      → all backends + dev deps
 
-# --- Núcleo (requerido) ---
-google-genai        # backend Gemini (default) + tipos GenerateContentConfig
-pandas              # dataframes de artículos / gold
-pyarrow             # lectura de parquet (gold standard)
-numpy               # RNG del loop, estadística
-rapidfuzz           # match difuso de entidades en la rúbrica
-pyyaml              # configs
-python-dotenv       # carga GEMINI_API_KEY desde .env
+# For development / running tests:
+pytest>=8.0
+pandas>=2.0
 
-# --- Backends LLM opcionales (instalar solo el que uses) ---
-# El backend se elige en runtime; cada SDK se importa de forma perezosa.
-anthropic           # --llm anthropic (Claude: Opus/Sonnet/Haiku)
-openai              # --llm openai (GPT)
-# Ollama no requiere paquete: se habla por HTTP a http://localhost:11434
-
-# --- Desarrollo ---
-pytest              # suite de tests (python -m pytest swarm_optimizer/tests/ -q)
+# Pick one (or more):
+# google-genai>=1.0
+# anthropic>=0.40
+# openai>=1.0

@@ -54,3 +54,28 @@ class TestRunLogger:
         log = RunLogger(run_id="r1", enabled=False, clock=lambda: 1234.0)
         rec = log.event("extractor", "gemini", "m", status="ok")
         assert rec["ts"] == 1234.0
+
+
+class TestFormatTrace:
+    def test_empty_events(self):
+        assert "(sin eventos)" in format_trace([])
+
+    def test_renders_calls_and_summary(self):
+        events = [
+            {"kind": "call", "role": "ner", "backend": "ollama",
+             "model": "qwen2.5:7b", "status": "ok", "tokens": 100,
+             "latency_s": 0.5, "detail": {"n_actors": 3}},
+            {"kind": "call", "role": "extractor", "backend": "gemini",
+             "model": "gemini-2.0-flash-lite", "status": "empty", "tokens": 200,
+             "latency_s": 1.2, "detail": {"n_relations": 0}},
+            {"kind": "summary", "mode": "end2end", "n_relations": 0,
+             "n_entities": 3, "total_tokens": 300, "n_calls": 2},
+        ]
+        out = format_trace(events)
+        assert "ner" in out
+        assert "extractor" in out
+        assert "ollama:qwen2.5:7b" in out
+        assert "gemini:gemini-2.0-flash-lite" in out
+        assert "ok" in out and "empty" in out
+        assert "300" in out          # total tokens en el summary
+        assert "end2end" in out      # mode en el summary

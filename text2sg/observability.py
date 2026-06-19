@@ -72,6 +72,34 @@ class RunLogger:
 
 
 def format_trace(events: list[dict]) -> str:
-    """Tabla legible de una traza para imprimir a stderr. Placeholder mínimo —
-    se completa en la Task 2."""
-    return ""
+    """Tabla legible de una traza para imprimir a stderr."""
+    if not events:
+        return "[trace] (sin eventos)"
+    calls = [e for e in events if e.get("kind") == "call"]
+    summary = next((e for e in events if e.get("kind") == "summary"), None)
+
+    lines = ["", "─── trace ───────────────────────────────────────────────"]
+    header = f"  {'role':<10} {'backend:model':<34} {'status':<7} {'tok':>6} {'s':>6}"
+    lines.append(header)
+    for e in calls:
+        bm = f"{e.get('backend', '?')}:{e.get('model', '?')}"
+        lines.append(
+            f"  {e.get('role', '?'):<10} {bm:<34} "
+            f"{e.get('status', '?'):<7} {e.get('tokens', 0):>6} "
+            f"{e.get('latency_s', 0.0):>6.2f}"
+        )
+        detail = e.get("detail") or {}
+        if detail:
+            kv = "  ".join(f"{k}={v}" for k, v in detail.items())
+            lines.append(f"             └ {kv}")
+    if summary:
+        lines.append("  " + "─" * 56)
+        lines.append(
+            f"  summary    mode={summary.get('mode', '?')}  "
+            f"relations={summary.get('n_relations', 0)}  "
+            f"entities={summary.get('n_entities', 0)}  "
+            f"tokens={summary.get('total_tokens', 0)}  "
+            f"calls={summary.get('n_calls', 0)}"
+        )
+    lines.append("─────────────────────────────────────────────────────────")
+    return "\n".join(lines)

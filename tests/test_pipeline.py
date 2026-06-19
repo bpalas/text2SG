@@ -226,3 +226,50 @@ class TestExtractText:
 
         tok = result["tokens"]
         assert tok["total"] == tok["ner"] + tok["extractor"] + tok["verifier"]
+
+    def test_logger_records_events(self):
+        from text2sg.observability import RunLogger
+        genome = self._genome()
+        ext_agent = AgentDef("ollama", "qwen2.5:7b")
+        config = PipelineConfig(mode="given_entities", extractor=ext_agent)
+        ext_client = _make_mock_client()
+        log = RunLogger(run_id="t", enabled=False)
+
+        with patch.object(ext_agent, "make_client", return_value=ext_client):
+            extract_text("Texto.", genome, config,
+                         actors=["Actor A"], logger=log)
+
+        kinds = [e["kind"] for e in log.events]
+        assert "call" in kinds
+        assert "summary" in kinds
+        ext_calls = [e for e in log.events
+                     if e["kind"] == "call" and e["role"] == "extractor"]
+        assert len(ext_calls) == 1
+        assert ext_calls[0]["backend"] == "ollama"
+        assert ext_calls[0]["model"] == "qwen2.5:7b"
+        assert ext_calls[0]["tokens"] > 0
+
+    def test_end2end_logger_records_ner_and_extractor(self):
+        from text2sg.observability import RunLogger
+        genome = self._genome()
+        ext_agent = AgentDef("ollama", "qwen2.5:7b")
+        config = PipelineConfig(mode="end2end", extractor=ext_agent)
+
+        ner_resp = MagicMock()
+        ner_resp.text = '{"actors": [{"uid": "U1", "canonical_name": "Boric", "type": "roster_actor"}]}'
+        ner_resp.usage_metadata.prompt_token_count = 80
+        ner_resp.usage_metadata.candidates_token_count = 20
+        ext_resp = MagicMock()
+        ext_resp.text = '{"entities": [], "relations": []}'
+        ext_resp.usage_metadata.prompt_token_count = 200
+        ext_resp.usage_metadata.candidates_token_count = 30
+        mock_client = MagicMock()
+        mock_client.models.generate_content.side_effect = [ner_resp, ext_resp]
+        log = RunLogger(run_id="t", enabled=False)
+
+        with patch.object(ext_agent, "make_client", return_value=mock_client):
+            extract_text("Boric anunció medidas.", genome, config, logger=log)
+
+        roles = [e["role"] for e in log.events if e["kind"] == "call"]
+        assert "ner" in roles
+        assert "extractor" in roles

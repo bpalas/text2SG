@@ -20,7 +20,7 @@ Examples:
     # (--genome optional; defaults to the built-in seed genome)
     python -m text2sg run --mode end2end \\
         --ner       ollama:qwen2.5:7b \\
-        --extractor gemini:gemini-2.0-flash-lite \\
+        --extractor gemini:gemini-2.5-flash-lite \\
         --verifier  anthropic:claude-haiku-4-5 \\
         --file      articulo.txt
 
@@ -51,7 +51,7 @@ def main() -> None:
     )
     rp.add_argument(
         "--extractor", required=True, metavar="BACKEND:MODEL",
-        help="Main extraction LLM. E.g.: ollama:qwen2.5:7b  gemini:gemini-2.0-flash-lite",
+        help="Main extraction LLM. E.g.: ollama:qwen2.5:7b  gemini:gemini-2.5-flash-lite",
     )
     rp.add_argument(
         "--ner", metavar="BACKEND:MODEL", default=None,
@@ -231,7 +231,7 @@ def _cmd_models() -> None:
         print("  Ollama not running.  Start with: ollama serve")
 
     print("\n-- Cloud APIs " + "-" * 49)
-    print("  gemini:gemini-2.0-flash-lite    GEMINI_API_KEY")
+    print("  gemini:gemini-2.5-flash-lite    GEMINI_API_KEY")
     print("  gemini:gemini-2.5-flash         GEMINI_API_KEY")
     print("  anthropic:claude-haiku-4-5      ANTHROPIC_API_KEY")
     print("  anthropic:claude-sonnet-4-6     ANTHROPIC_API_KEY")

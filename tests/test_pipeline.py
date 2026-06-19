@@ -273,3 +273,21 @@ class TestExtractText:
         roles = [e["role"] for e in log.events if e["kind"] == "call"]
         assert "ner" in roles
         assert "extractor" in roles
+
+    def test_logger_writes_jsonl_through_pipeline(self, tmp_path):
+        import json as _json
+        from text2sg.observability import RunLogger
+        genome = self._genome()
+        ext_agent = AgentDef("ollama", "qwen2.5:7b")
+        config = PipelineConfig(mode="given_entities", extractor=ext_agent)
+        ext_client = _make_mock_client()
+        log = RunLogger(run_id="t", out_dir=str(tmp_path), enabled=True)
+
+        with patch.object(ext_agent, "make_client", return_value=ext_client):
+            extract_text("Texto.", genome, config, actors=["Actor A"], logger=log)
+
+        with open(log.path, encoding="utf-8") as fh:
+            lines = fh.read().strip().splitlines()
+        kinds = [_json.loads(ln)["kind"] for ln in lines]
+        assert "call" in kinds
+        assert "summary" in kinds

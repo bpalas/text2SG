@@ -199,7 +199,8 @@ def extract_text(
         token_counts["verifier"] = ver_tokens
         logger.event(
             "verifier", config.verifier.backend, config.verifier.model,
-            status="ok", tokens=ver_tokens, latency_s=time.time() - t0,
+            status="ok" if ver_tokens > 0 else "empty",
+            tokens=ver_tokens, latency_s=time.time() - t0,
             detail={"n_relations_out": len(verified_rels)},
         )
 

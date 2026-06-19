@@ -296,7 +296,6 @@ class TestExtractText:
 class TestCliRunWritesTrace:
     def test_run_writes_jsonl_trace(self, tmp_path, monkeypatch, capsys):
         import json as _json
-        from unittest.mock import MagicMock, patch
         import text2sg.__main__ as cli
 
         # cliente LLM mockeado: devuelve una relación válida
@@ -332,9 +331,8 @@ class TestCliRunWritesTrace:
         err = capsys.readouterr().err
         assert "trace" in err
 
-    def test_no_log_skips_file(self, tmp_path, monkeypatch):
+    def test_no_log_skips_file(self, tmp_path, monkeypatch, capsys):
         import json as _json
-        from unittest.mock import MagicMock, patch
         import text2sg.__main__ as cli
 
         payload = _json.dumps({"entities": [], "relations": []})
@@ -359,3 +357,8 @@ class TestCliRunWritesTrace:
             cli.main()
 
         assert not log_dir.exists() or list(log_dir.glob("*.jsonl")) == []
+
+        captured = capsys.readouterr()
+        # observability output goes to stderr; stdout must stay clean
+        assert "trace" not in captured.out
+        assert "[text2sg]" not in captured.out

@@ -143,7 +143,11 @@ def _cmd_run(args: argparse.Namespace) -> None:
     )
 
     # -- run logger -- #
-    run_id = f"{time.strftime('%Y%m%dT%H%M%S')}-{os.getpid()}"
+    _now = time.time()
+    run_id = (
+        f"{time.strftime('%Y%m%dT%H%M%S', time.localtime(_now))}"
+        f"{int((_now % 1) * 1000):03d}-{os.getpid()}"
+    )
     logger = RunLogger(
         run_id=run_id,
         out_dir=args.log_dir,

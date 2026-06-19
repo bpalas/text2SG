@@ -93,7 +93,7 @@ python -m text2sg run \
 # ...prints a trace table to stderr and saves results/runs/<timestamp>.jsonl
 ```
 
-Disable with `--no-log`, or change the location with `--log-dir DIR`.
+The trace table always prints to stderr. Use `--no-log` to skip writing the JSONL file, or `--log-dir DIR` to change where it's saved.
 
 ---
 

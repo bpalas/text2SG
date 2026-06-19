@@ -81,7 +81,7 @@ def main() -> None:
     )
     rp.add_argument(
         "--no-log", action="store_true",
-        help="Disable writing the run trace to disk",
+        help="Don't save the JSONL trace file (the stderr trace table still prints)",
     )
 
     # -- models -------------------------------------------------------------- #
@@ -145,7 +145,7 @@ def _cmd_run(args: argparse.Namespace) -> None:
     # -- run logger -- #
     _now = time.time()
     run_id = (
-        f"{time.strftime('%Y%m%dT%H%M%S', time.localtime(_now))}"
+        f"{time.strftime('%Y%m%dT%H%M%S', time.gmtime(_now))}"
         f"{int((_now % 1) * 1000):03d}-{os.getpid()}"
     )
     logger = RunLogger(

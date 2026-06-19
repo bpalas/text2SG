@@ -31,6 +31,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import sys
 
 
@@ -74,6 +75,14 @@ def main() -> None:
         "--output", choices=["pretty", "json"], default="pretty",
         help="Output format (default: pretty)",
     )
+    rp.add_argument(
+        "--log-dir", metavar="DIR", default="results/runs",
+        help="Directory for per-run JSONL traces (default: results/runs)",
+    )
+    rp.add_argument(
+        "--no-log", action="store_true",
+        help="Disable writing the run trace to disk",
+    )
 
     # -- models -------------------------------------------------------------- #
     sub.add_parser("models", help="List available models (Ollama + cloud backends)")
@@ -91,7 +100,9 @@ def main() -> None:
 # -- command implementations ------------------------------------------------- #
 
 def _cmd_run(args: argparse.Namespace) -> None:
+    import time
     from text2sg.genome import Genome
+    from text2sg.observability import RunLogger, format_trace
     from text2sg.pipeline import PipelineConfig, extract_text
 
     # -- load text -- #
@@ -131,6 +142,14 @@ def _cmd_run(args: argparse.Namespace) -> None:
         verifier=args.verifier,
     )
 
+    # -- run logger -- #
+    run_id = f"{time.strftime('%Y%m%dT%H%M%S')}-{os.getpid()}"
+    logger = RunLogger(
+        run_id=run_id,
+        out_dir=args.log_dir,
+        enabled=not args.no_log,
+    )
+
     # -- log plan -- #
     print(f"[text2sg] mode      = {config.mode}", file=sys.stderr)
     print(f"[text2sg] extractor = {config.extractor}", file=sys.stderr)
@@ -146,6 +165,7 @@ def _cmd_run(args: argparse.Namespace) -> None:
         text, genome, config,
         actors=args.actors,
         article_id=args.file or "stdin",
+        logger=logger,
     )
 
     # -- output -- #
@@ -153,6 +173,11 @@ def _cmd_run(args: argparse.Namespace) -> None:
         print(json.dumps(result, ensure_ascii=False, indent=2))
     else:
         _pretty_print(result)
+
+    # -- trace -- #
+    print(format_trace(logger.events), file=sys.stderr)
+    if logger.path:
+        print(f"[text2sg] trace saved to {logger.path}", file=sys.stderr)
 
 
 def _pretty_print(result: dict) -> None:

@@ -291,3 +291,71 @@ class TestExtractText:
         kinds = [_json.loads(ln)["kind"] for ln in lines]
         assert "call" in kinds
         assert "summary" in kinds
+
+
+class TestCliRunWritesTrace:
+    def test_run_writes_jsonl_trace(self, tmp_path, monkeypatch, capsys):
+        import json as _json
+        from unittest.mock import MagicMock, patch
+        import text2sg.__main__ as cli
+
+        # cliente LLM mockeado: devuelve una relación válida
+        payload = _json.dumps({"entities": [], "relations": [
+            {"from_entity": "A", "to_entity": "B", "act_type": "endorses",
+             "polarity": "positive", "issue": "x",
+             "evidence_quote": "A respaldó a B"}]})
+        resp = MagicMock()
+        resp.text = payload
+        resp.usage_metadata.prompt_token_count = 10
+        resp.usage_metadata.candidates_token_count = 5
+        mock_client = MagicMock()
+        mock_client.models.generate_content.return_value = resp
+
+        log_dir = tmp_path / "runs"
+        argv = ["prog", "run",
+                "--extractor", "ollama:qwen2.5:7b",
+                "--actors", "A", "B",
+                "--text", "A respaldó a B",
+                "--log-dir", str(log_dir)]
+        monkeypatch.setattr(cli.sys, "argv", argv)
+
+        with patch("text2sg.pipeline.AgentDef.make_client",
+                   return_value=mock_client):
+            cli.main()
+
+        files = list(log_dir.glob("*.jsonl"))
+        assert len(files) == 1
+        lines = files[0].read_text(encoding="utf-8").strip().splitlines()
+        kinds = [_json.loads(ln)["kind"] for ln in lines]
+        assert "call" in kinds and "summary" in kinds
+        # la traza se imprime a stderr
+        err = capsys.readouterr().err
+        assert "trace" in err
+
+    def test_no_log_skips_file(self, tmp_path, monkeypatch):
+        import json as _json
+        from unittest.mock import MagicMock, patch
+        import text2sg.__main__ as cli
+
+        payload = _json.dumps({"entities": [], "relations": []})
+        resp = MagicMock()
+        resp.text = payload
+        resp.usage_metadata.prompt_token_count = 10
+        resp.usage_metadata.candidates_token_count = 5
+        mock_client = MagicMock()
+        mock_client.models.generate_content.return_value = resp
+
+        log_dir = tmp_path / "runs"
+        argv = ["prog", "run",
+                "--extractor", "ollama:qwen2.5:7b",
+                "--actors", "A",
+                "--text", "texto",
+                "--log-dir", str(log_dir),
+                "--no-log"]
+        monkeypatch.setattr(cli.sys, "argv", argv)
+
+        with patch("text2sg.pipeline.AgentDef.make_client",
+                   return_value=mock_client):
+            cli.main()
+
+        assert not log_dir.exists() or list(log_dir.glob("*.jsonl")) == []

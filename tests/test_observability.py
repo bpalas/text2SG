@@ -32,7 +32,8 @@ class TestRunLogger:
         log = RunLogger(run_id="r1", out_dir=str(tmp_path), enabled=True)
         log.event("ner", "ollama", "qwen2.5:7b", status="ok", tokens=10)
         log.event("extractor", "ollama", "qwen2.5:7b", status="empty", tokens=20)
-        lines = open(log.path, encoding="utf-8").read().strip().splitlines()
+        with open(log.path, encoding="utf-8") as fh:
+            lines = fh.read().strip().splitlines()
         assert len(lines) == 2
         first = json.loads(lines[0])
         assert first["role"] == "ner"

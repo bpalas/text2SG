@@ -48,6 +48,8 @@ class RunLogger:
 
     def summary(self, mode: str, n_relations: int, n_entities: int,
                 total_tokens: int) -> dict:
+        # NOTE: summary records intentionally have no `latency_s` field — they
+        # aggregate a whole run, not a single call, so per-call latency is N/A.
         rec = {
             "run_id": self.run_id,
             "ts": self.clock(),

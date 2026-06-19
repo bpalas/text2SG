@@ -49,19 +49,22 @@ export GEMINI_API_KEY=...      # or ANTHROPIC_API_KEY / OPENAI_API_KEY
 
 ```python
 from text2sg.genome import Genome
-from text2sg.extractor import run_extraction
-from text2sg.llm_backends import GeminiClient
+from text2sg.pipeline import PipelineConfig, extract_text
 
-# Load the champion genome (prompt + validation config + analysis config)
-genome = Genome.from_json("genomes/id15_champion.json")
+# Built-in seed genome (prompt + validation config + analysis config).
+# The optimized champion genome is produced separately by text2graph-evolve.
+genome = Genome.from_seed()
 
-article = {
-    "body": "Boric respaldó las propuestas de Vallejo, mientras que Kast las calificó de peligrosas.",
-    "unions": ["Gabriel Boric", "Camila Vallejo", "José Antonio Kast"],  # known actors
-}
+config = PipelineConfig.from_cli_args(
+    mode="given_entities",                    # you supply the actors
+    extractor="gemini:gemini-2.0-flash-lite",
+)
 
-client = GeminiClient()
-result = run_extraction(article, genome, client, model="gemini-2.0-flash-lite")
+result = extract_text(
+    "Boric respaldó las propuestas de Vallejo, mientras que Kast las calificó de peligrosas.",
+    genome, config,
+    actors=["Gabriel Boric", "Camila Vallejo", "José Antonio Kast"],
+)
 
 for rel in result["relations"]:
     print(f"{rel['from_entity']} --[{rel['act_type']}]--> {rel['to_entity']}")
@@ -72,8 +75,17 @@ for rel in result["relations"]:
 **No actors pre-computed? Use end-to-end mode** (NER + extraction in one call):
 
 ```python
-result = run_extraction(article_without_unions, genome, client,
-                        model="gemini-2.0-flash-lite", end2end=True)
+config = PipelineConfig.from_cli_args(mode="end2end", extractor="gemini:gemini-2.0-flash-lite")
+result = extract_text(article_text, genome, config)   # no actors needed
+```
+
+Or straight from the shell:
+
+```bash
+python -m text2sg run \
+    --extractor gemini:gemini-2.0-flash-lite \
+    --actors "Gabriel Boric" "Camila Vallejo" "José Antonio Kast" \
+    --text "Boric respaldó las propuestas de Vallejo, mientras que Kast las calificó de peligrosas."
 ```
 
 ---
@@ -221,4 +233,4 @@ If you use this tool in academic work:
 
 ## License
 
-MIT — see [LICENSE](LICENSE). The synthetic oracle and champion genomes are included. Real corpus data (IMFD) is not redistributed.
+MIT — see [LICENSE](LICENSE). The package ships a built-in seed genome (`Genome.from_seed()`); optimized champion genomes are produced by [text2graph-evolve](https://github.com/bpalas/text2graph-evolve). Real corpus data (IMFD) is not redistributed.

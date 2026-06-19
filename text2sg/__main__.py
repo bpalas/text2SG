@@ -17,11 +17,11 @@ Examples:
         --file articulo.txt
 
     # mixed backends: cheap local NER, cloud for extraction, Claude to verify
+    # (--genome optional; defaults to the built-in seed genome)
     python -m text2sg run --mode end2end \\
         --ner       ollama:qwen2.5:7b \\
         --extractor gemini:gemini-2.0-flash-lite \\
         --verifier  anthropic:claude-haiku-4-5 \\
-        --genome    genomes/id15_champion.json \\
         --file      articulo.txt
 
     # list what's available

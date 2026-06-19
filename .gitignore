@@ -17,6 +17,9 @@ venv/
 # Planillas de validación (contienen texto del corpus, licencia IMFD)
 gold_standard/*.xlsx
 
+# Secretos locales (API keys) — nunca versionar
+.secrets/
+
 # Gold standard data (grande, licencia IMFD — versionar solo lo generado)
 gold_standard_v5/
 

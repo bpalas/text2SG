@@ -27,6 +27,9 @@ results/swarm/best_config.json
 results/swarm/policy.json
 results/swarm/splits.json
 
+# Trazas de observabilidad por corrida (regenerables)
+results/runs/
+
 # Logs temporales
 *.log
 run_output.log

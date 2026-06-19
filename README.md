@@ -78,6 +78,25 @@ result = run_extraction(article_without_unions, genome, client,
 
 ---
 
+## Observability
+
+Every CLI run writes a structured JSONL trace — one event per LLM call
+(role, backend, model, tokens, latency, status) plus a summary — so you can
+verify each track works with each backend:
+
+```bash
+python -m text2sg run \
+    --mode end2end \
+    --ner       ollama:qwen2.5:7b \
+    --extractor gemini:gemini-2.0-flash-lite \
+    --file      articulo.txt
+# ...prints a trace table to stderr and saves results/runs/<timestamp>.jsonl
+```
+
+Disable with `--no-log`, or change the location with `--log-dir DIR`.
+
+---
+
 ## Genome: the three-artifact design
 
 A genome encodes the full extraction strategy as three independently mutable artifacts:
